@@ -1,0 +1,3 @@
+$kind: collection
+name: Evaluation Service
+description: Requests for the Evaluation Service API including registration and authentication.

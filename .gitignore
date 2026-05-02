@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.next/
+out/
+.env
+.env.local
+.auth-body.json
+*.log
+.DS_Store
+
+# Postman: keep secrets local; copy from .example
+postman/environments/evaluation-service.env.yaml

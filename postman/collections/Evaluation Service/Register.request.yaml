@@ -1,0 +1,19 @@
+$kind: http-request
+name: Register
+method: POST
+url: '{{baseUrl}}/register'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{email}}",
+      "name": "{{name}}",
+      "rollNo": "{{rollNo}}",
+      "mobileNo": "8754557045",
+      "githubUsername": "adhavan18",
+      "accessCode": "{{accessCode}}"
+    }

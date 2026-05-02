@@ -1,0 +1,17 @@
+{
+  "name": "stage1-priority-inbox",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prestart": "npm run build --prefix ../libs/logging-middleware",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@evaluation/logging-middleware": "file:../libs/logging-middleware"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

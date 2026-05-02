@@ -1,0 +1,14 @@
+{
+  "name": "affordmed-campus-evaluation",
+  "private": true,
+  "workspaces": [
+    "libs/logging-middleware",
+    "stage1-priority-inbox",
+    "campus-notifications-ui"
+  ],
+  "scripts": {
+    "build:logging": "npm run build --workspace=@evaluation/logging-middleware",
+    "stage1": "npm run start --workspace=stage1-priority-inbox",
+    "dev:ui": "npm run dev --workspace=campus-notifications-ui"
+  }
+}

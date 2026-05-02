@@ -1,5 +1,5 @@
 import { createRequestLoggingMiddleware } from "@evaluation/logging-middleware";
-import { fetchAllNotificationsPages } from "@/lib/upstream";
+import { fetchAllNotificationsPages, UpstreamHttpError } from "@/lib/upstream";
 import { sortByRecencyDesc, topPriorityNotifications } from "@/lib/priority";
 
 export const runtime = "nodejs";
@@ -26,6 +26,10 @@ export async function GET(req: Request) {
     trace.complete(200);
     return Response.json({ notifications: items });
   } catch (e) {
+    if (e instanceof UpstreamHttpError) {
+      trace.complete(e.statusCode);
+      return Response.json({ error: e.message, detail: e.detail }, { status: e.statusCode });
+    }
     const message = e instanceof Error ? e.message : String(e);
     trace.complete(502);
     return Response.json({ error: message }, { status: 502 });

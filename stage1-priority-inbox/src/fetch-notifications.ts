@@ -3,7 +3,7 @@ import type { Notification } from "./notification.js";
 
 const log = createLogger("stage1-fetch");
 
-const DEFAULT_BASE = "http://20.207.122.201/evaluation-service";
+const DEFAULT_BASE = "https://20.207.122.201/evaluation-service";
 
 export interface NotificationsResponse {
   notifications: Notification[];

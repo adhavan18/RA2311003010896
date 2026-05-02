@@ -3,18 +3,30 @@ import type { Notification, NotificationsResponse } from "./types";
 
 const log = createLogger("upstream");
 
-const DEFAULT_BASE = "http://20.207.122.201/evaluation-service";
+const DEFAULT_BASE = "https://20.207.122.201/evaluation-service";
+
+export class UpstreamHttpError extends Error {
+  readonly statusCode: number;
+  readonly detail?: string;
+
+  constructor(message: string, statusCode: number, detail?: string) {
+    super(message);
+    this.name = "UpstreamHttpError";
+    this.statusCode = statusCode;
+    this.detail = detail;
+  }
+}
 
 function baseUrl(): string {
   return (process.env.EVALUATION_SERVICE_BASE ?? DEFAULT_BASE).replace(/\/$/, "");
 }
 
 function token(): string {
-  const t = process.env.EVALUATION_ACCESS_TOKEN;
-  if (!t?.trim()) {
-    throw new Error("Missing EVALUATION_ACCESS_TOKEN");
+  const t = process.env.EVALUATION_ACCESS_TOKEN?.replace(/^\uFEFF/, "").trim();
+  if (!t) {
+    throw new UpstreamHttpError("Missing EVALUATION_ACCESS_TOKEN", 500);
   }
-  return t.trim();
+  return t;
 }
 
 export async function fetchNotificationsPage(params: {
@@ -46,7 +58,11 @@ export async function fetchNotificationsPage(params: {
   if (!res.ok) {
     const body = await res.text();
     log.error("upstream:error", { status: res.status, bodyPreview: body.slice(0, 400) });
-    throw new Error(`Upstream notifications failed: ${res.status}`);
+    throw new UpstreamHttpError(
+      `Upstream notifications failed: HTTP ${res.status}`,
+      res.status,
+      body.slice(0, 400),
+    );
   }
 
   const data = (await res.json()) as NotificationsResponse;

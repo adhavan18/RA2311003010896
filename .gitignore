@@ -10,3 +10,9 @@ out/
 
 # Postman: keep secrets local; copy from .example
 postman/environments/evaluation-service.env.yaml
+
+# Postman IDE scratch collections (often embed tokens/secrets)
+postman/collections/New Collection/
+
+# Postman workspace metadata (local)
+.postman/

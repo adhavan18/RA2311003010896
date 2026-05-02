@@ -3,7 +3,8 @@ import type { Notification, NotificationsResponse } from "./types";
 
 const log = createLogger("upstream");
 
-const DEFAULT_BASE = "https://20.207.122.201/evaluation-service";
+/** IP + HTTPS often breaks Node TLS; use HTTP unless EVALUATION_SERVICE_BASE overrides. */
+const DEFAULT_BASE = "http://20.207.122.201/evaluation-service";
 
 export class UpstreamHttpError extends Error {
   readonly statusCode: number;
@@ -47,13 +48,26 @@ export async function fetchNotificationsPage(params: {
     notification_type: params.notification_type ?? null,
   });
 
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token()}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token()}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+  } catch (netErr) {
+    const err = netErr instanceof Error ? netErr : new Error(String(netErr));
+    const cause =
+      err.cause instanceof Error
+        ? err.cause.message
+        : err.cause !== undefined
+          ? String(err.cause)
+          : undefined;
+    log.error("upstream:network_error", { url: url.toString(), message: err.message, cause });
+    throw err;
+  }
 
   if (!res.ok) {
     const body = await res.text();

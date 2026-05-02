@@ -3,7 +3,8 @@ import type { Notification } from "./notification.js";
 
 const log = createLogger("stage1-fetch");
 
-const DEFAULT_BASE = "https://20.207.122.201/evaluation-service";
+/** IP-based HTTPS often fails Node TLS (cert hostname); HTTP works for this host unless you override. */
+const DEFAULT_BASE = "http://20.207.122.201/evaluation-service";
 
 export interface NotificationsResponse {
   notifications: Notification[];
@@ -24,12 +25,29 @@ export async function fetchAllNotifications(
 
     log.info("notifications:fetch_page", { page, limit, url: url.toString() });
 
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      });
+    } catch (netErr) {
+      const err = netErr instanceof Error ? netErr : new Error(String(netErr));
+      const cause =
+        err.cause instanceof Error
+          ? err.cause.message
+          : err.cause !== undefined
+            ? String(err.cause)
+            : undefined;
+      log.error("notifications:network_error", {
+        url: url.toString(),
+        message: err.message,
+        cause,
+      });
+      throw err;
+    }
 
     if (!res.ok) {
       const body = await res.text();

@@ -29,8 +29,14 @@ async function main() {
     process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
     log.info("run:done", { emittedJson: true });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    log.error("run:failed", { message });
+    const err = e instanceof Error ? e : new Error(String(e));
+    const cause =
+      err.cause instanceof Error
+        ? err.cause.message
+        : err.cause !== undefined
+          ? String(err.cause)
+          : undefined;
+    log.error("run:failed", { message: err.message, cause });
     process.exitCode = 1;
   }
 }
